@@ -6,6 +6,8 @@ use roped::*;
 pub enum Sys {
     #[bundle(name = "quit")]
     Quit(Quit),
+    #[bundle(name = "stop")]
+    Stop(Quit),
 }
 
 #[derive(Debug)]

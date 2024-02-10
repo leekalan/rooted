@@ -1,6 +1,5 @@
 use roped::*;
 
-
 #[allow(dead_code)]
 #[derive(Debug, Strand)]
 #[strand(state = "EmptyState", action = "action")]

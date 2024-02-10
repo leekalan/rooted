@@ -1,10 +1,10 @@
 use roped::*;
 
-mod sys;
 mod change_directory;
+mod sys;
 
-use sys::Sys;
 use change_directory::ChangeDirectory;
+use sys::Sys;
 
 #[allow(dead_code)]
 #[derive(Debug, Bundle)]
@@ -13,7 +13,9 @@ enum Container {
     #[bundle(prefix = "$")]
     Sys(Sys),
     #[bundle(prefix = "@")]
-    ChangeDirectory(ChangeDirectory),
+    At(ChangeDirectory),
+    #[bundle(name = "cd")]
+    CD(ChangeDirectory),
 }
 
 fn main() {
