@@ -26,7 +26,6 @@ impl Strand for Restart {
     }
 }
 
-
 #[derive(Debug)]
 pub struct Quit;
 

@@ -14,8 +14,8 @@ use change_directory::ChangeDirectory;
 use clean_addr::*;
 use dir::*;
 use state::State;
-use sys::Sys;
 use state::Status;
+use sys::Sys;
 
 #[allow(dead_code)]
 #[derive(Debug, Bundle)]
@@ -72,11 +72,11 @@ fn main() {
             Status::Restarting => {
                 println!("Restarting...");
                 state = begin();
-            },
+            }
             Status::Quitting => {
                 println!("Exiting the process shortly...");
                 std::process::exit(0)
-            },
+            }
         }
     }
 }
