@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 pub struct State {
+    pub home: PathBuf,
     pub moving: Moving,
 }
 

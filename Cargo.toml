@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 roped = "0.6.0"
+dirs = "5.0.1"
