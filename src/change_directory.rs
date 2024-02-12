@@ -1,14 +1,16 @@
 use roped::*;
 
+use crate::State;
+
 #[allow(dead_code)]
 #[derive(Debug, Strand)]
-#[strand(state = "EmptyState", action = "action")]
+#[strand(state = "State", action = "action")]
 pub struct ChangeDirectory {
     path: String,
 }
 
 impl ChangeDirectory {
-    fn action(&self, _: &mut EmptyState) -> Result<(), String> {
+    fn action(&self, _: &mut State) -> Result<(), String> {
         todo!()
     }
 }

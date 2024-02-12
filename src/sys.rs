@@ -1,8 +1,10 @@
 use roped::*;
 
+use crate::State;
+
 #[allow(dead_code)]
 #[derive(Debug, Bundle)]
-#[bundle(state = "EmptyState")]
+#[bundle(state = "State")]
 pub enum Sys {
     #[bundle(name = "quit")]
     Quit(Quit),
@@ -14,7 +16,7 @@ pub enum Sys {
 pub struct Quit;
 
 impl Strand for Quit {
-    type State = EmptyState;
+    type State = State;
 
     fn run(_: &mut Self::State, _: &str, _: &[char]) -> Result<(), String> {
         println!("Exiting the process shortly...");
