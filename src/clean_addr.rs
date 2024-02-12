@@ -1,19 +1,25 @@
 pub fn clean_addr() -> Result<String, String> {
     if let Ok(current_dir) = std::env::current_dir() {
-        if let Ok(canonicalized_path) = current_dir.canonicalize() {
-            if std::env::set_current_dir(&canonicalized_path).is_err() {
-                return Err("!Failed to canonicalize current directory".into());
-            }
-            Ok(truncate_path_string(&canonicalized_path, 30, 4)?)
-        } else {
-            Err("!Failed to canonicalize current directory".into())
+        let canonicalized_path = canonicalize_path(&current_dir)?;
+        if std::env::set_current_dir(&canonicalized_path).is_err() {
+            return Err("Failed to canonicalize current directory".into());
         }
+        Ok(truncate_path_string(&canonicalized_path)?)
     } else {
-        Err("!Failed to get current directory".into())
+        Err("Failed to get current directory".into())
     }
 }
 
-fn truncate_path_string(
+pub fn canonicalize_path(path: &std::path::Path) -> Result<std::path::PathBuf, String> {
+    path.canonicalize()
+        .map_err(|_| "Failed to canonicalize current directory".into())
+}
+
+pub fn truncate_path_string(path: &std::path::Path) -> Result<String, String> {
+    truncate_path_string_core(path, 30, 4)
+}
+
+fn truncate_path_string_core(
     path: &std::path::Path,
     max_chars: usize,
     max_depth: usize,

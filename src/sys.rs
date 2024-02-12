@@ -1,11 +1,13 @@
 use roped::*;
 
-use crate::State;
+use crate::{State, Status};
 
 #[allow(dead_code)]
 #[derive(Debug, Bundle)]
 #[bundle(state = "State")]
 pub enum Sys {
+    #[bundle(name = "restart")]
+    Restart(Restart),
     #[bundle(name = "quit")]
     Quit(Quit),
     #[bundle(name = "stop")]
@@ -13,13 +15,26 @@ pub enum Sys {
 }
 
 #[derive(Debug)]
+pub struct Restart;
+
+impl Strand for Restart {
+    type State = State;
+
+    fn run(state: &mut Self::State, _: &str, _: &[char]) -> Result<(), String> {
+        state.status = Status::Restarting;
+        Ok(())
+    }
+}
+
+
+#[derive(Debug)]
 pub struct Quit;
 
 impl Strand for Quit {
     type State = State;
 
-    fn run(_: &mut Self::State, _: &str, _: &[char]) -> Result<(), String> {
-        println!("Exiting the process shortly...");
-        std::process::exit(0);
+    fn run(state: &mut Self::State, _: &str, _: &[char]) -> Result<(), String> {
+        state.status = Status::Quitting;
+        Ok(())
     }
 }

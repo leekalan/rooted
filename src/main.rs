@@ -5,14 +5,17 @@ use roped::*;
 mod boot;
 mod change_directory;
 mod clean_addr;
+mod dir;
 mod state;
 mod sys;
 
-use boot::boot;
+use boot::*;
 use change_directory::ChangeDirectory;
-use clean_addr::clean_addr;
+use clean_addr::*;
+use dir::*;
 use state::State;
 use sys::Sys;
+use state::Status;
 
 #[allow(dead_code)]
 #[derive(Debug, Bundle)]
@@ -35,6 +38,7 @@ fn begin() -> State {
     }
 
     State {
+        status: Status::None,
         home: env::current_dir().unwrap(),
         moving: state::Moving::None,
     }
@@ -47,7 +51,7 @@ fn main() {
         let addr = match clean_addr() {
             Ok(v) => v,
             Err(err) => {
-                println!("{}\nReloading", err);
+                println!("{}\nRestarting...", err);
                 state = begin();
                 continue;
             }
@@ -61,6 +65,18 @@ fn main() {
             "!".into(),
             &[' '],
             &['\n'],
-        )
+        );
+
+        match state.status {
+            Status::None => (),
+            Status::Restarting => {
+                println!("Restarting...");
+                state = begin();
+            },
+            Status::Quitting => {
+                println!("Exiting the process shortly...");
+                std::process::exit(0)
+            },
+        }
     }
 }

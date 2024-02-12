@@ -7,7 +7,7 @@ pub fn boot() -> Result<(), String> {
     if let Some(dir) = dirs::home_dir() {
         env::set_current_dir(dir)
             .ok()
-            .ok_or("!Unable to set home directory")?;
+            .ok_or("Unable to set home directory")?;
     } else {
         println!("!Unable to get home directory");
 
