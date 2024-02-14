@@ -75,7 +75,7 @@ fn main() {
             }
             Status::Quitting => {
                 println!("Exiting the process shortly...");
-                std::process::exit(0)
+                std::process::exit(0);
             }
         }
     }
