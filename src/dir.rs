@@ -27,3 +27,9 @@ pub fn offset_dir(rel_path: &Path) -> Result<PathBuf, String> {
     })?;
     Ok(new_dir)
 }
+
+pub fn display(path: &Path, depth: usize) -> Result<String, String> {
+    
+}
+
+pub fn display
