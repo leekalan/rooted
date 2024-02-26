@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{fs::FileType, path::Path};
 
 use crate::is_valid;
 
@@ -47,16 +47,35 @@ fn display(path: &Path, depth: usize) -> Result<String, String> {
 
     let mut display_info = DisplayInfo {
         container: None,
-        offset: 0,
-        position_offset: 0,
+        offset: Vec::with_capacity(depth),
     };
 
-    accumulator += &display_sub(path, display_info, depth)?;
+    accumulator += &display_sub(path, &mut display_info, depth)?;
 
     Ok(accumulator)
 }
 
-fn display_sub(path: &Path, display_info: DisplayInfo, depth: usize) -> Result<String, String> {
+fn display_sub(
+    path: &Path,
+    display_info: &mut DisplayInfo,
+    depth: usize,
+) -> Result<String, String> {
+    let mut entries: Vec<Result<std::fs::DirEntry, _>> = std::fs::read_dir(path).map_err(|_| "Could not read directory")?.collect();
+    for (i, entry_w) in entries.iter().enumerate() {
+        let entry = entry_w.as_ref().map_err(|_| "Could not read entry")?;
+
+        let file_type = entry.file_type().map_err(|_| "Could not read file type")?;
+
+        let final_element = entries.len() - 1 == i;
+
+        if file_type.is_file() {
+        } else if file_type.is_dir() {
+
+        } else {
+
+        }
+    }
+
     todo!()
 }
 
@@ -87,14 +106,31 @@ impl DisplayContainer {
     }
 }
 
+enum DisplaySpacing {
+    Pipe,
+    Gap,
+}
+impl DisplaySpacing {
+    fn read(&self) -> &str {
+        match self {
+            DisplaySpacing::Pipe => "| ",
+            DisplaySpacing::Gap => "  ",
+        }
+    }
+}
+
 struct DisplayInfo {
     container: Option<DisplayContainer>,
-    offset: usize,
-    position_offset: usize,
+    offset: Vec<DisplaySpacing>,
 }
 impl DisplayInfo {
     fn read(&self) -> String {
-        let preface = "| ".repeat(self.offset) + &"  ".repeat(self.position_offset);
+        let preface = self
+            .offset
+            .iter()
+            .fold(String::with_capacity(self.offset.len() * 2), |acc, x| {
+                acc + x.read()
+            });
         let result = match self.container.as_ref() {
             Some(container) => preface + &container.read(),
             None => preface,
