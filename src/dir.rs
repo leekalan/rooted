@@ -28,8 +28,40 @@ pub fn offset_dir(rel_path: &Path) -> Result<PathBuf, String> {
     Ok(new_dir)
 }
 
+//
+// Folder1
+// +-Folder2
+// | |-File 1
+// | |
+// | `-File 2
+// |
+// |-File 1
+// |
+// +-Folder 3
+//   |-File 1
+//   |
+//   `-File 2
+//
+
 pub fn display(path: &Path, depth: usize) -> Result<String, String> {
-    
+    todo!()
 }
 
-pub fn display
+enum DisplayType {
+    Folder,
+    Item,
+    End,
+}
+struct DisplayContainer {
+    name: String,
+    display_type: DisplayType,
+}
+struct DisplayInfo {
+    container: Option<DisplayContainer>,
+    offset: usize,
+    stacked_offset: usize,
+}
+
+pub fn display_element(display_type: DisplayInfo) -> String {
+    
+}
