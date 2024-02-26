@@ -6,6 +6,7 @@ mod boot;
 mod change_directory;
 mod clean_addr;
 mod dir;
+mod display;
 mod state;
 mod sys;
 
