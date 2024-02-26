@@ -14,6 +14,7 @@ use boot::*;
 use change_directory::ChangeDirectory;
 use clean_addr::*;
 use dir::*;
+use display::DisplayDirectory;
 use state::State;
 use state::Status;
 use sys::Sys;
@@ -26,10 +27,16 @@ enum Container {
     Dollar(Sys),
     #[bundle(name = "sys")]
     Sys(Sys),
+
     #[bundle(prefix = "@")]
     At(ChangeDirectory),
     #[bundle(name = "cd")]
     CD(ChangeDirectory),
+
+    #[bundle(prefix = "#")]
+    Hash(DisplayDirectory),
+    #[bundle(name = "list")]
+    List(DisplayDirectory),
 }
 
 fn begin() -> State {
@@ -65,7 +72,7 @@ fn main() {
             ". ".into(),
             "!".into(),
             &[' '],
-            &['\n'],
+            &[';', '\n'],
         );
 
         match state.status {

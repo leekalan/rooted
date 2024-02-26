@@ -25,6 +25,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "castr"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "84e7abeb5dc63aef61ce91445902fa5292bb36070bae3d305076734167cbad2a"
+
+[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -149,6 +155,7 @@ dependencies = [
 name = "rooted"
 version = "0.1.0"
 dependencies = [
+ "castr",
  "colored",
  "dirs",
  "parsr",
