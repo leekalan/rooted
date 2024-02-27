@@ -1,7 +1,10 @@
 use std::{
     env,
     io::{self, Write},
+    path::PathBuf,
 };
+
+use crate::truncate_path_string;
 
 pub fn boot() -> Result<(), String> {
     if let Some(dir) = dirs::home_dir() {
@@ -30,7 +33,10 @@ pub fn boot() -> Result<(), String> {
                     println!("!Unable to set as home directory\nRetrying...");
                     continue;
                 } else {
-                    println!("Succesfully set \"{}\" as home directory", user_input);
+                    println!(
+                        "Succesfully set \"{}\" as home directory",
+                        truncate_path_string(&PathBuf::from(user_input))
+                    );
 
                     //TODO
                     //print!("Would you like to set this as your default directory?");

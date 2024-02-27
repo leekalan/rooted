@@ -22,7 +22,7 @@ pub fn offset_dir(rel_path: &Path) -> Result<PathBuf, String> {
     let new_dir = new_dir_r.canonicalize().map_err(|_| {
         format!(
             "Could not find directory \"{}\"",
-            crate::truncate_path_string(&new_dir_r).unwrap_or("Cannot display".into()),
+            crate::truncate_path_string(&new_dir_r),
         )
     })?;
     Ok(new_dir)

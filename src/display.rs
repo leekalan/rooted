@@ -38,10 +38,9 @@ fn display(path: &Path, depth: usize) -> Result<String, String> {
     let mut accumulator: String = path
         .components()
         .last()
-        .map_or("<empty>", |component| {
-            component.as_os_str().to_str().unwrap_or("<empty>")
-        })
-        .to_owned();
+        .map_or("<empty>".to_string(), |component| {
+            component.as_os_str().to_string_lossy().to_string()
+        });
     accumulator.push('\n');
 
     let mut display_info = DisplayInfo {
@@ -64,7 +63,7 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
         Ok(v) => v.collect(),
         Err(_) => {
             display_info.container = DisplayContainer {
-                name: "Corrupted Directory".to_owned(),
+                name: format!("Corrupted Directory \"{}\"", path.to_string_lossy()),
                 display_type: DisplayType::CoreErr,
             };
 
@@ -93,11 +92,7 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
 
         let is_final_entry = entries.len() - 1 == i;
 
-        let file_name = entry
-            .file_name()
-            .to_str()
-            .unwrap_or("<invalid_name>")
-            .to_owned();
+        let file_name = entry.file_name().to_string_lossy().to_string();
 
         if let Ok(file_type) = file_type {
             if file_type.is_dir() {

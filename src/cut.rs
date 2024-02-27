@@ -15,7 +15,7 @@ impl Strand for CutDirectory {
             .trim_end_matches(ws)
             .replace('~', "..");
         let new_dir = crate::offset_dir(&std::path::PathBuf::from(path))?;
-        println!("{}", truncate_path_string(&new_dir)?);
+        println!("Cut \"{}\"", truncate_path_string(&new_dir));
         state.moving = Moving::Move(new_dir, MoveType::Cut);
 
         Ok(())
