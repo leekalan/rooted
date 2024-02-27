@@ -79,7 +79,7 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
             Ok(v) => v,
             Err(_) => {
                 display_info.container = DisplayContainer {
-                    name: "Invalid Entry".to_owned(),
+                    name: "<invalid_entry>".to_owned(),
                     display_type: DisplayType::Err,
                 };
 
@@ -93,7 +93,11 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
 
         let is_final_entry = entries.len() - 1 == i;
 
-        let file_name = entry.file_name().to_str().unwrap_or("<empty>").to_owned();
+        let file_name = entry
+            .file_name()
+            .to_str()
+            .unwrap_or("<invalid_name>")
+            .to_owned();
 
         if let Ok(file_type) = file_type {
             if file_type.is_dir() {

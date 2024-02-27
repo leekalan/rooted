@@ -14,12 +14,7 @@ pub enum Status {
 
 pub enum Moving {
     None,
-    Move(PathBuf, PathType, MoveType),
-}
-
-pub enum PathType {
-    Identity,
-    Contents,
+    Move(PathBuf, MoveType),
 }
 
 pub enum MoveType {

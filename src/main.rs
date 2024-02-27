@@ -5,16 +5,22 @@ use roped::*;
 mod boot;
 mod change_directory;
 mod clean_addr;
+mod copy;
+mod cut;
 mod dir;
 mod display;
+mod paste;
 mod state;
 mod sys;
 
 use boot::*;
 use change_directory::ChangeDirectory;
 use clean_addr::*;
+use copy::CopyDirectory;
+use cut::CutDirectory;
 use dir::*;
 use display::DisplayDirectory;
+use paste::PasteDirectory;
 use state::State;
 use state::Status;
 use sys::Sys;
@@ -37,6 +43,16 @@ enum Container {
     Hash(DisplayDirectory),
     #[bundle(name = "list")]
     List(DisplayDirectory),
+
+    #[bundle(prefix = "&")]
+    And(CopyDirectory),
+    #[bundle(name = "copy")]
+    Copy(CopyDirectory),
+
+    #[bundle(prefix = "^")]
+    Move(CutDirectory),
+    #[bundle(name = "cut")]
+    Cut(CutDirectory),
 }
 
 fn begin() -> State {
