@@ -49,8 +49,8 @@ pub fn move_entry_ref(origin: &Path, destination: &Path) -> Result<(), String> {
 
                 let trimmed_input = input.trim().to_lowercase();
 
-                if trimmed_input != "y" && trimmed_input != "yes" {
-                    println!("| Skipping...");
+                if trimmed_input == "y" && trimmed_input == "yes" {
+                    println!("| Cancelling...");
                     return Err("Cancelled".to_string());
                 }
             }
@@ -72,7 +72,7 @@ pub fn move_entry_ref(origin: &Path, destination: &Path) -> Result<(), String> {
 
             let trimmed_input = input.trim().to_lowercase();
 
-            if trimmed_input != "r" && trimmed_input != "replace" {
+            if trimmed_input == "r" || trimmed_input == "replace" {
                 if crate::delete(destination).is_none() {
                     return Err(format!(
                         "Could not delete \"{}\"",
@@ -96,13 +96,13 @@ pub fn move_entry_ref(origin: &Path, destination: &Path) -> Result<(), String> {
 
                         let trimmed_input = input.trim().to_lowercase();
 
-                        if trimmed_input != "y" && trimmed_input != "yes" {
-                            println!("| Skipping...");
+                        if trimmed_input == "y" || trimmed_input == "yes" {
+                            println!("| Cancelling...");
                             return Err("Cancelled".to_string());
                         }
                     }
                 }
-            } else if trimmed_input != "s" && trimmed_input != "skip" {
+            } else if trimmed_input == "s" || trimmed_input == "skip" {
                 return Ok(());
             } else {
                 return Err("Cancelled".to_string());
