@@ -117,40 +117,44 @@ fn main() {
     }
 }
 
-//
-// TestDir
-// +-FolderA
-// | |-ItemA1 (contents: ITEMA1)
-// | `-ItemA2 (contents: ITEMA1)
-// +-FolderB
-// | |-ItemB1 (contents: ITEMB1)
-// | `-ItemB2 (contents: ITEMB2)
-// |-ItemA.txt (contents: ITEMA)
-// `-ItemB.txt (contents: ITEMB)
-//
-#[test]
-fn rebuild_test_directory() {
-    let origin = std::path::PathBuf::from("C:\\Users\\kalan\\test_template");
-    let destination = std::path::PathBuf::from("C:\\Users\\kalan\\test_instance");
-
-    let _ = std::fs::remove_dir_all(&destination);
-
-    copy_directory(&origin, &destination)
-}
-#[allow(dead_code)]
-fn copy_directory(src: &std::path::Path, dest: &std::path::Path) {
-    std::fs::create_dir_all(dest).unwrap();
-
-    for entry in std::fs::read_dir(src).unwrap() {
-        let entry = entry.unwrap();
-        let entry_type = entry.file_type().unwrap();
-
-        let entry_dest = dest.join(entry.file_name());
-
-        if entry_type.is_dir() {
-            copy_directory(&entry.path(), &entry_dest);
-        } else {
-            std::fs::copy(&entry.path(), &entry_dest).unwrap();
+#[cfg(test)]
+mod tests {
+    //
+    // TestDir
+    // +-FolderA
+    // | |-ItemA1 (contents: ITEMA1)
+    // | `-ItemA2 (contents: ITEMA1)
+    // +-FolderB
+    // | |-ItemB1 (contents: ITEMB1)
+    // | `-ItemB2 (contents: ITEMB2)
+    // |-ItemA.txt (contents: ITEMA)
+    // `-ItemB.txt (contents: ITEMB)
+    //
+    
+    #[test]
+    fn rebuild_test_directory() {
+        let origin = std::path::PathBuf::from("C:\\Users\\kalan\\test_template");
+        let destination = std::path::PathBuf::from("C:\\Users\\kalan\\test_instance");
+    
+        let _ = std::fs::remove_dir_all(&destination);
+    
+        copy_directory(&origin, &destination)
+    }
+    #[allow(dead_code)]
+    fn copy_directory(src: &std::path::Path, dest: &std::path::Path) {
+        std::fs::create_dir_all(dest).unwrap();
+    
+        for entry in std::fs::read_dir(src).unwrap() {
+            let entry = entry.unwrap();
+            let entry_type = entry.file_type().unwrap();
+    
+            let entry_dest = dest.join(entry.file_name());
+    
+            if entry_type.is_dir() {
+                copy_directory(&entry.path(), &entry_dest);
+            } else {
+                std::fs::copy(&entry.path(), &entry_dest).unwrap();
+            }
         }
     }
 }
