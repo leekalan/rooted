@@ -5,6 +5,7 @@ pub struct State {
     pub home: PathBuf,
     pub moving: Moving,
     pub display: DisplayState,
+    pub file: Option<std::fs::File>,
 }
 
 pub enum Status {

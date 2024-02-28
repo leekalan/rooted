@@ -6,6 +6,7 @@ mod boot;
 mod change_directory;
 mod clean_addr;
 mod copy;
+mod create;
 mod cut;
 mod delete;
 mod dir;
@@ -18,6 +19,7 @@ use boot::*;
 use change_directory::ChangeDirectory;
 use clean_addr::*;
 use copy::CopyDirectory;
+use create::*;
 use cut::CutDirectory;
 use delete::*;
 use dir::*;
@@ -77,6 +79,7 @@ fn begin() -> State {
             default_depth: 1,
             display_style: state::DisplayOption::Clean,
         },
+        file: None,
     }
 }
 

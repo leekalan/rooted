@@ -4,7 +4,6 @@ use roped::Strand;
 
 use crate::{paste::functions::EntryType, state::State, truncate_path_string};
 
-
 #[derive(Debug)]
 pub struct DeleteDirectory;
 
