@@ -15,8 +15,9 @@ impl Strand for CopyDirectory {
             .trim_end_matches(ws)
             .replace('~', "..");
         let new_dir = crate::offset_dir(&std::path::PathBuf::from(path))?;
-        println!("Copied \"{}\"", truncate_path_string(&new_dir));
+        let print = truncate_path_string(&new_dir);
         state.moving = Moving::Move(new_dir, MoveType::Copy);
+        println!("Copied \"{}\"", print);
 
         Ok(())
     }
