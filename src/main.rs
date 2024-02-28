@@ -122,13 +122,15 @@ mod tests {
     //
     // TestDir
     // +-FolderA
-    // | |-ItemA1 (contents: ITEMA1)
-    // | `-ItemA2 (contents: ITEMA1)
+    // | |-Item1 (contents: ITEMA1)
+    // | `-Item2 (contents: ITEMA2)
     // +-FolderB
-    // | |-ItemB1 (contents: ITEMB1)
-    // | `-ItemB2 (contents: ITEMB2)
+    // | |-Item1 (contents: ITEMB1)
+    // | `-Item2 (contents: ITEMB2)
     // |-ItemA.txt (contents: ITEMA)
-    // `-ItemB.txt (contents: ITEMB)
+    // |-ItemB.txt (contents: ITEMB)
+    // |-Item1.txt (contents: ITEM1)
+    // `-Item2.txt (contents: ITEM2)
     //
 
     #[test]
