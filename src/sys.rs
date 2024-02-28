@@ -79,7 +79,10 @@ pub struct Display {
 impl Display {
     fn action(self, state: &mut State) -> Result<(), String> {
         state.display.display_style = self.display_style;
-        println!("Changed cfg.display.display_style to {}", self.display_style);
+        println!(
+            "Changed cfg.display.display_style to {}",
+            self.display_style
+        );
         Ok(())
     }
 }

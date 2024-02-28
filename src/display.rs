@@ -26,7 +26,10 @@ impl Strand for DisplayDirectory {
             .trim_end_matches(ws)
             .replace('~', "..");
         let new_dir = crate::offset_dir(&std::path::PathBuf::from(path))?;
-        println!("{}", display(&new_dir, depth - 1, &state.display.display_style)?);
+        println!(
+            "{}",
+            display(&new_dir, depth - 1, &state.display.display_style)?
+        );
 
         Ok(())
     }
@@ -60,7 +63,12 @@ fn display(path: &Path, depth: usize, display: &DisplayOption) -> Result<String,
     Ok(accumulator)
 }
 
-fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize, display: &DisplayOption) -> String {
+fn display_sub(
+    path: &Path,
+    display_info: &mut DisplayInfo,
+    depth: usize,
+    display: &DisplayOption,
+) -> String {
     let mut accumulator = String::new();
 
     let entries: Vec<Result<std::fs::DirEntry, _>> = match std::fs::read_dir(path) {
