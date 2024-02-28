@@ -66,6 +66,7 @@ pub struct Depth {
 impl Depth {
     fn action(self, state: &mut State) -> Result<(), String> {
         state.display.default_depth = self.depth;
+        println!("Changed cfg.display.default_depth to {}", self.depth);
         Ok(())
     }
 }
@@ -73,11 +74,12 @@ impl Depth {
 #[derive(Debug, Strand)]
 #[strand(state = "State", action = "action")]
 pub struct Display {
-    display_option: DisplayOption,
+    display_style: DisplayOption,
 }
 impl Display {
     fn action(self, state: &mut State) -> Result<(), String> {
-        state.display.display_type = self.display_option;
+        state.display.display_style = self.display_style;
+        println!("Changed cfg.display.display_style to {}", self.display_style);
         Ok(())
     }
 }

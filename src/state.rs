@@ -24,9 +24,9 @@ pub enum MoveType {
 
 pub struct DisplayState {
     pub default_depth: usize,
-    pub display_type: DisplayOption,
+    pub display_style: DisplayOption,
 }
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum DisplayOption {
     Clean,
     Detailed,
@@ -39,6 +39,14 @@ impl FromStr for DisplayOption {
             "c" | "C" | "clean" | "Clean" => Ok(DisplayOption::Clean),
             "f" | "F" | "fancy" | "Fancy" => Ok(DisplayOption::Detailed),
             _ => Err(()),
+        }
+    }
+}
+impl std::fmt::Display for DisplayOption {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DisplayOption::Clean => f.write_str("Clean"),
+            DisplayOption::Detailed => f.write_str("Fancy"),
         }
     }
 }

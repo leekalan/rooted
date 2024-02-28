@@ -75,7 +75,7 @@ fn begin() -> State {
         moving: state::Moving::None,
         display: DisplayState {
             default_depth: 1,
-            display_type: state::DisplayOption::Clean,
+            display_style: state::DisplayOption::Clean,
         }
     }
 }

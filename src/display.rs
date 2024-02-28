@@ -26,7 +26,7 @@ impl Strand for DisplayDirectory {
             .trim_end_matches(ws)
             .replace('~', "..");
         let new_dir = crate::offset_dir(&std::path::PathBuf::from(path))?;
-        println!("{}", display(&new_dir, depth - 1, &state.display.display_type)?);
+        println!("{}", display(&new_dir, depth - 1, &state.display.display_style)?);
 
         Ok(())
     }
