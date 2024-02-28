@@ -1,4 +1,4 @@
-mod functions;
+pub mod functions;
 use functions::*;
 
 use crate::*;
@@ -55,46 +55,39 @@ fn paste_dir(
     move_type: &MoveType,
     move_info: &MoveInfo,
 ) -> Result<String, String> {
-    let meta = origin.metadata().map_err(|_| {
-        format!(
-            "Corrupted or missing copy directory \"{}\"",
-            truncate_path_string(origin)
-        )
-    })?;
-    let file_type = meta.file_type();
+    match (move_type, move_info) {
+        (MoveType::Copy, MoveInfo::Ident) => {
+            todo!()
+        }
+        (MoveType::Copy, MoveInfo::Contents) => {
+            todo!()
+        }
+        (MoveType::Cut, MoveInfo::Ident) => {
+            let name = origin.file_name().ok_or("Unnamed copy directory")?;
 
-    let origin_type = if file_type.is_dir() {
-        PathType::Folder
-    } else if file_type.is_file() {
-        PathType::File
-    } else {
-        return Err(format!(
-            "Invalid copy directory \"{}\"",
-            truncate_path_string(origin)
-        ));
-    };
+            let new_des = destination.join(name);
 
-    match (origin_type, move_type, move_info) {
-        (PathType::Folder, MoveType::Copy, MoveInfo::Ident) => copy_folder_to(origin, destination),
-        (PathType::Folder, MoveType::Copy, MoveInfo::Contents) => {
-            copy_folder_contents_to(origin, destination)
+            move_entry_ref(origin, &new_des)?;
+
+            Ok(format!(
+                "Moved \"{}\" into \"{}\"",
+                truncate_path_string(origin),
+                truncate_path_string(destination)
+            ))
         }
-        (PathType::Folder, MoveType::Cut, MoveInfo::Ident) => move_item_to(origin, destination),
-        (PathType::Folder, MoveType::Cut, MoveInfo::Contents) => {
-            move_folder_contents_to(origin, destination)
-        }
-        (PathType::File, MoveType::Copy, MoveInfo::Ident) => copy_file_to(origin, destination),
-        (PathType::File, MoveType::Copy, MoveInfo::Contents) => {
-            copy_file_contents_to(origin, destination)
-        }
-        (PathType::File, MoveType::Cut, MoveInfo::Ident) => move_item_to(origin, destination),
-        (PathType::File, MoveType::Cut, MoveInfo::Contents) => {
-            move_file_contents_to(origin, destination)
+        (MoveType::Cut, MoveInfo::Contents) => {
+            let origin_type = EntryType::get(origin);
+
+            match origin_type {
+                EntryType::Folder => move_folder_contents(origin, destination)?,
+                _ => move_entry_ref(origin, destination)?,
+            };
+
+            Ok(format!(
+                "Moved contents of \"{}\" into \"{}\"",
+                truncate_path_string(origin),
+                truncate_path_string(destination)
+            ))
         }
     }
-}
-
-enum PathType {
-    Folder,
-    File,
 }

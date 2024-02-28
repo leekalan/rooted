@@ -12,7 +12,7 @@ impl Strand for ChangeDirectory {
         let path = input
             .trim_start_matches(ws)
             .trim_end_matches(ws)
-            .replace('~', "..");
+            .replace('~', "..\\");
         let new_dir = crate::offset_dir(&std::path::PathBuf::from(path))?;
         crate::set_dir(&new_dir)
     }

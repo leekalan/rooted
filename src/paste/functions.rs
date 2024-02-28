@@ -2,52 +2,8 @@ use std::path::Path;
 
 use crate::truncate_path_string;
 
-pub fn copy_file_to(origin: &Path, destination: &Path) -> Result<String, String> {
-    todo!()
-}
-
-pub fn copy_file_contents_to(origin: &Path, destination: &Path) -> Result<String, String> {
-    todo!()
-}
-
-pub fn copy_folder_to(origin: &Path, destination: &Path) -> Result<String, String> {
-    todo!()
-}
-
-pub fn copy_folder_contents_to(origin: &Path, destination: &Path) -> Result<String, String> {
-    todo!()
-}
-
-pub fn move_file_to() {}
-
-pub fn move_file_contents_to(origin: &Path, destination: &Path) -> Result<String, String> {
-    todo!()
-}
-
-pub fn move_folder_to(origin: &Path, destination: &Path) -> Result<String, String> {
-    let name = origin
-        .file_name()
-        .ok_or("Unnamed copy directory")?
-        .to_string_lossy()
-        .to_string();
-
-    let new_des = destination.join(name);
-
-    todo!()
-}
-
-pub fn move_folder_contents_to(origin: &Path, destination: &Path) -> Result<String, String> {
-    if destination.exists() {
-        todo!()
-
-        //TODO
-        //Delete original directory
-    } else {
-        todo!()
-    }
-}
-
-enum EntryType {
+#[derive(PartialEq, Eq)]
+pub enum EntryType {
     File,
     Folder,
     Other,
@@ -69,7 +25,7 @@ impl EntryType {
     }
 }
 
-fn move_entry_ref(origin: &Path, destination: &Path) -> Result<(), String> {
+pub fn move_entry_ref(origin: &Path, destination: &Path) -> Result<(), String> {
     let origin_type = EntryType::get(origin);
     let destination_type = EntryType::get(destination);
 
@@ -81,57 +37,121 @@ fn move_entry_ref(origin: &Path, destination: &Path) -> Result<(), String> {
             Ok(_) => (),
             Err(_) => {
                 println!(
-                    "Unable to move \"{}\" to \"{}\", do you want to cancel? (y)",
+                    "| Unable to move \"{}\" to \"{}\", do you want to cancel? (y)",
                     truncate_path_string(origin),
                     truncate_path_string(destination)
                 );
-    
+
                 let mut input = String::new();
                 std::io::stdin()
                     .read_line(&mut input)
                     .expect("Failed to read user input");
-        
+
                 let trimmed_input = input.trim().to_lowercase();
-        
+
                 if trimmed_input != "y" && trimmed_input != "yes" {
-                    println!("Skipping...");
-                    return Err("cancelled".to_string());
+                    println!("| Skipping...");
+                    return Err("Cancelled".to_string());
                 }
-            },
+            }
         },
         // Copy the contents as it is a folder
-        (EntryType::Folder, EntryType::Folder) => todo!(),
+        (EntryType::Folder, EntryType::Folder) => move_folder_contents(origin, destination)?,
         // Already exists so will be replaced
-        (_, _) => todo!(),
-    }
+        (_, _) => {
+            println!(
+                "| Entry \"{}\" already exists, do you want to replace (r), skip (s) or cancel (c) at \"{}\"?",
+                truncate_path_string(destination),
+                truncate_path_string(origin)
+            );
 
-    if destination.exists() {
-        println!(
-            "Directory \"{}\" already exists, do you want to add the contents of \"{}\"? (y)",
-            truncate_path_string(destination),
-            truncate_path_string(origin)
-        );
+            let mut input = String::new();
+            std::io::stdin()
+                .read_line(&mut input)
+                .expect("Failed to read user input");
 
-        let mut input = String::new();
-        std::io::stdin()
-            .read_line(&mut input)
-            .expect("Failed to read user input");
+            let trimmed_input = input.trim().to_lowercase();
 
-        let trimmed_input = input.trim().to_lowercase();
+            if trimmed_input != "r" && trimmed_input != "replace" {
+                if crate::delete(destination).is_none() {
+                    return Err(format!(
+                        "Could not delete \"{}\"",
+                        truncate_path_string(destination)
+                    ));
+                }
 
-        if trimmed_input != "y" && trimmed_input != "yes" {
-            println!("Skipping...");
-            return Ok(());
+                match std::fs::rename(origin, destination) {
+                    Ok(_) => (),
+                    Err(_) => {
+                        println!(
+                            "| Unable to move \"{}\" to \"{}\", do you want to cancel? (y)",
+                            truncate_path_string(origin),
+                            truncate_path_string(destination)
+                        );
+
+                        let mut input = String::new();
+                        std::io::stdin()
+                            .read_line(&mut input)
+                            .expect("Failed to read user input");
+
+                        let trimmed_input = input.trim().to_lowercase();
+
+                        if trimmed_input != "y" && trimmed_input != "yes" {
+                            println!("| Skipping...");
+                            return Err("Cancelled".to_string());
+                        }
+                    }
+                }
+            } else if trimmed_input != "s" && trimmed_input != "skip" {
+                return Ok(());
+            } else {
+                return Err("Cancelled".to_string());
+            }
         }
-
-        move_entry_contents(origin, destination)?;
-    } else {
-        std::fs::rename(origin, destination).map_err(|_| "Invalid destination")?;
     }
 
     Ok(())
 }
 
-fn move_entry_contents(origin: &Path, destination: &Path) -> Result<(), String> {
-    todo!()
+pub fn move_folder_contents(origin: &Path, destination: &Path) -> Result<(), String> {
+    let origin_type = EntryType::get(origin);
+    let destination_type = EntryType::get(destination);
+
+    if origin_type != EntryType::Folder {
+        return Err(format!(
+            "Origin \"{}\" is not a folder",
+            truncate_path_string(origin)
+        ));
+    } else if destination_type != EntryType::Folder {
+        return Err(format!(
+            "Destination \"{}\" is not a folder",
+            truncate_path_string(origin)
+        ));
+    }
+
+    let entries = match origin.read_dir() {
+        Ok(v) => v,
+        Err(_) => {
+            return Err(format!(
+                "Could not read the contents of \"{}\"",
+                truncate_path_string(origin)
+            ))
+        }
+    };
+
+    for entry in entries {
+        let entry = match entry {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+
+        move_entry_ref(&entry.path(), &destination.join(entry.file_name()))?;
+    }
+
+    crate::delete(origin).ok_or(format!(
+        "Could not delete \"{}\"",
+        truncate_path_string(origin)
+    ))?;
+
+    Ok(())
 }

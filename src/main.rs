@@ -7,6 +7,7 @@ mod change_directory;
 mod clean_addr;
 mod copy;
 mod cut;
+mod delete;
 mod dir;
 mod display;
 mod paste;
@@ -18,9 +19,11 @@ use change_directory::ChangeDirectory;
 use clean_addr::*;
 use copy::CopyDirectory;
 use cut::CutDirectory;
+use delete::*;
 use dir::*;
 use display::DisplayDirectory;
 use paste::PasteDirectory;
+use state::DisplayState;
 use state::State;
 use state::Status;
 use sys::Sys;
@@ -53,6 +56,11 @@ enum Container {
     Move(CutDirectory),
     #[bundle(name = "cut")]
     Cut(CutDirectory),
+
+    #[bundle(prefix = "*")]
+    Deref(PasteDirectory),
+    #[bundle(name = "paste")]
+    Paste(PasteDirectory),
 }
 
 fn begin() -> State {
@@ -65,6 +73,10 @@ fn begin() -> State {
         status: Status::None,
         home: env::current_dir().unwrap(),
         moving: state::Moving::None,
+        display: DisplayState {
+            default_depth: 1,
+            display_type: state::DisplayOption::Clean,
+        }
     }
 }
 
@@ -101,6 +113,44 @@ fn main() {
                 println!("Exiting the process shortly...");
                 std::process::exit(0)
             }
+        }
+    }
+}
+
+//
+// TestDir
+// +-FolderA
+// | |-ItemA1 (contents: ITEMA1)
+// | `-ItemA2 (contents: ITEMA1)
+// +-FolderB
+// | |-ItemB1 (contents: ITEMB1)
+// | `-ItemB2 (contents: ITEMB2)
+// |-ItemA.txt (contents: ITEMA)
+// `-ItemB.txt (contents: ITEMB)
+//
+#[test]
+fn rebuild_test_directory() {
+    let origin = std::path::PathBuf::from("C:\\Users\\kalan\\test_template");
+    let destination = std::path::PathBuf::from("C:\\Users\\kalan\\test_instance");
+
+    let _ = std::fs::remove_dir_all(&destination);
+
+    copy_directory(&origin, &destination)
+}
+#[allow(dead_code)]
+fn copy_directory(src: &std::path::Path, dest: &std::path::Path) {
+    std::fs::create_dir_all(dest).unwrap();
+
+    for entry in std::fs::read_dir(src).unwrap() {
+        let entry = entry.unwrap();
+        let entry_type = entry.file_type().unwrap();
+
+        let entry_dest = dest.join(entry.file_name());
+
+        if entry_type.is_dir() {
+            copy_directory(&entry.path(), &entry_dest);
+        } else {
+            std::fs::copy(&entry.path(), &entry_dest).unwrap();
         }
     }
 }

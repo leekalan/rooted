@@ -5,18 +5,20 @@ use parsr::parse::Parse;
 
 use std::path::Path;
 
+use self::state::DisplayOption;
+
 #[derive(Debug)]
 pub struct DisplayDirectory;
 
 impl Strand for DisplayDirectory {
     type State = State;
 
-    fn run(_: &mut Self::State, input: &str, ws: &[char]) -> Result<(), String> {
+    fn run(state: &mut Self::State, input: &str, ws: &[char]) -> Result<(), String> {
         let parse_result = input.parse_one_arg(ws);
 
         let (input_p, depth): (_, usize) = match parse_result.parsed.cast_to() {
             Some(v) => (parse_result.excess.unwrap_or(""), v),
-            None => (input, 1),
+            None => (input, state.display.default_depth),
         };
 
         let path = input_p
@@ -24,18 +26,20 @@ impl Strand for DisplayDirectory {
             .trim_end_matches(ws)
             .replace('~', "..");
         let new_dir = crate::offset_dir(&std::path::PathBuf::from(path))?;
-        println!("{}", display(&new_dir, depth)?);
+        println!("{}", display(&new_dir, depth - 1, &state.display.display_type)?);
 
         Ok(())
     }
 }
 
-fn display(path: &Path, depth: usize) -> Result<String, String> {
+fn display(path: &Path, depth: usize, display: &DisplayOption) -> Result<String, String> {
     if !is_valid(path) {
         return Err("Invalid path".into());
     }
 
-    let mut accumulator: String = path
+    let mut accumulator = String::from('\n');
+
+    accumulator += &path
         .components()
         .last()
         .map_or("<empty>".to_string(), |component| {
@@ -51,12 +55,12 @@ fn display(path: &Path, depth: usize) -> Result<String, String> {
         offset: Vec::with_capacity(depth),
     };
 
-    accumulator += &display_sub(path, &mut display_info, depth);
+    accumulator += &display_sub(path, &mut display_info, depth, display);
 
     Ok(accumulator)
 }
 
-fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> String {
+fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize, display: &DisplayOption) -> String {
     let mut accumulator = String::new();
 
     let entries: Vec<Result<std::fs::DirEntry, _>> = match std::fs::read_dir(path) {
@@ -67,7 +71,7 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
                 display_type: DisplayType::CoreErr,
             };
 
-            accumulator += &display_info.read();
+            accumulator += &display_info.read(display);
             accumulator.push('\n');
             return accumulator;
         }
@@ -82,7 +86,7 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
                     display_type: DisplayType::Err,
                 };
 
-                accumulator += &display_info.read();
+                accumulator += &display_info.read(display);
                 accumulator.push('\n');
                 continue;
             }
@@ -101,7 +105,7 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
                     display_type: DisplayType::Folder,
                 };
 
-                accumulator += &display_info.read();
+                accumulator += &display_info.read(display);
                 accumulator.push('\n');
 
                 if depth > 0 {
@@ -114,7 +118,7 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
                     };
                     display_info.offset.push(offset);
 
-                    accumulator += &display_sub(&new_path, display_info, depth - 1);
+                    accumulator += &display_sub(&new_path, display_info, depth - 1, display);
 
                     display_info.offset.pop();
                 }
@@ -130,7 +134,7 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
                     display_type,
                 };
 
-                accumulator += &display_info.read();
+                accumulator += &display_info.read(display);
                 accumulator.push('\n');
             } else {
                 display_info.container = DisplayContainer {
@@ -138,7 +142,7 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
                     display_type: DisplayType::Other,
                 };
 
-                accumulator += &display_info.read();
+                accumulator += &display_info.read(display);
                 accumulator.push('\n');
             }
         } else {
@@ -147,7 +151,7 @@ fn display_sub(path: &Path, display_info: &mut DisplayInfo, depth: usize) -> Str
                 display_type: DisplayType::Err,
             };
 
-            accumulator += &display_info.read();
+            accumulator += &display_info.read(display);
             accumulator.push('\n');
         }
     }
@@ -164,14 +168,24 @@ enum DisplayType {
     End,
 }
 impl DisplayType {
-    fn read(&self) -> &str {
-        match self {
-            DisplayType::Folder => "+-",
-            DisplayType::Item => "|-",
-            DisplayType::Other => "?-",
-            DisplayType::Err => "!-",
-            DisplayType::CoreErr => "!!",
-            DisplayType::End => "`-",
+    fn read(&self, display: &state::DisplayOption) -> &str {
+        match display {
+            state::DisplayOption::Clean => match self {
+                DisplayType::Folder => "+ ",
+                DisplayType::Item => "| ",
+                DisplayType::Other => "? ",
+                DisplayType::Err => "! ",
+                DisplayType::CoreErr => "!!",
+                DisplayType::End => "| ",
+            },
+            state::DisplayOption::Detailed => match self {
+                DisplayType::Folder => "+-",
+                DisplayType::Item => "|-",
+                DisplayType::Other => "?-",
+                DisplayType::Err => "!-",
+                DisplayType::CoreErr => "!!",
+                DisplayType::End => "`-",
+            },
         }
     }
 }
@@ -181,8 +195,8 @@ struct DisplayContainer {
     display_type: DisplayType,
 }
 impl DisplayContainer {
-    fn read(&self) -> String {
-        let mut concat = self.display_type.read().to_owned();
+    fn read(&self, display: &state::DisplayOption) -> String {
+        let mut concat = self.display_type.read(display).to_owned();
         concat += &self.name;
         concat
     }
@@ -206,13 +220,13 @@ struct DisplayInfo {
     offset: Vec<DisplaySpacing>,
 }
 impl DisplayInfo {
-    fn read(&self) -> String {
+    fn read(&self, display: &state::DisplayOption) -> String {
         let preface = self
             .offset
             .iter()
             .fold(String::with_capacity(self.offset.len() * 2), |acc, x| {
                 acc + x.read()
             });
-        preface + &self.container.read()
+        preface + &self.container.read(display)
     }
 }

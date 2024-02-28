@@ -33,13 +33,14 @@ fn truncate_path_string_core(path: &std::path::Path, max_chars: usize, max_depth
     let mut string = String::new();
 
     let mut index = 1usize;
-    for component in components.get(components.len() - max_depth..).unwrap() {
-        let s = component.as_os_str().to_string_lossy().to_string();
+    for component in components.iter().rev() {
+        let mut s = component.as_os_str().to_string_lossy().to_string();
         if string.len() + s.len() >= max_chars {
             break;
         }
-        string.push('\\');
-        string.push_str(&s);
+        s.push('\\');
+        s += &string;
+        string = s;
         if index >= max_depth {
             break;
         }
