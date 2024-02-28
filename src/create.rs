@@ -11,7 +11,17 @@ impl Strand for CreateDirectory {
     type State = State;
 
     fn run(state: &mut Self::State, input: &str, ws: &[char]) -> Result<(), String> {
-        let path = input
+        let (input_p, entry_type) = if let Some(c) = input.chars().next() {
+            if c == '#' {
+                (unsafe { input.get_unchecked(1..) }, EntryType::File)
+            } else {
+                (input, EntryType::Folder)
+            }
+        } else {
+            (input, EntryType::Folder)
+        };
+
+        let path = input_p
             .trim_start_matches(ws)
             .trim_end_matches(ws)
             .replace('~', "..");
@@ -19,26 +29,28 @@ impl Strand for CreateDirectory {
 
         let print = truncate_path_string(&new_dir);
 
-        match create(&new_dir, EntryType::File) {
+        match create(&new_dir, entry_type) {
             Ok(result) => {
                 match result {
                     CreateContainer::File(file) => {
                         state.file = Some(file);
                         println!("Created file \"{}\", it is now opened", print);
-                    },
+                    }
                     CreateContainer::Folder => {
                         println!("Created directory \"{}\"", print);
-                    },
+                    }
                 }
                 Ok(())
-            },
-            Err(err) => {
-                match err {
-                    CreateError::CreateFile => Err(format!("Could not create file \"{}\"", print)),
-                    CreateError::CreateFolder => Err(format!("Could not create directory \"{}\"", print)),
-                    CreateError::AlreadyExists => Err(format!("Directory \"{}\" already exists", print)),
-                    CreateError::InvalidType => Err("Invalid entry type".to_string()),
+            }
+            Err(err) => match err {
+                CreateError::CreateFile => Err(format!("Could not create file \"{}\"", print)),
+                CreateError::CreateFolder => {
+                    Err(format!("Could not create directory \"{}\"", print))
                 }
+                CreateError::AlreadyExists => {
+                    Err(format!("Directory \"{}\" already exists", print))
+                }
+                CreateError::InvalidType => Err("Invalid entry type".to_string()),
             },
         }
     }
@@ -75,7 +87,7 @@ pub fn create(path: &Path, entry_type: EntryType) -> Result<CreateContainer, Cre
                 .ok_or(CreateError::CreateFolder)?;
 
             Ok(CreateContainer::Folder)
-        },
+        }
         _ => Err(CreateError::InvalidType),
     }
 }

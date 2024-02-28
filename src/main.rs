@@ -49,8 +49,18 @@ enum Container {
     #[bundle(name = "list")]
     List(DisplayDirectory),
 
+    #[bundle(prefix = "+")]
+    Add(CreateDirectory),
+    #[bundle(name = "create")]
+    Create(CreateDirectory),
+
+    #[bundle(prefix = "-")]
+    Subtract(DeleteDirectory),
+    #[bundle(name = "remove")]
+    Remove(DeleteDirectory),
+
     #[bundle(prefix = "&")]
-    And(CopyDirectory),
+    Ref(CopyDirectory),
     #[bundle(name = "copy")]
     Copy(CopyDirectory),
 
