@@ -2,7 +2,7 @@ use std::path::Path;
 
 use roped::Strand;
 
-use crate::{paste::functions::EntryType, state::State, truncate_path_string};
+use crate::{get_dir, paste::functions::EntryType, state::State, truncate_path_string};
 
 #[derive(Debug)]
 pub struct CreateDirectory;
@@ -25,7 +25,7 @@ impl Strand for CreateDirectory {
             .trim_start_matches(ws)
             .trim_end_matches(ws)
             .replace('~', "..");
-        let new_dir = crate::offset_dir(&std::path::PathBuf::from(path))?;
+        let new_dir = get_dir()?.join(path);
 
         let print = truncate_path_string(&new_dir);
 
