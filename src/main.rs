@@ -12,8 +12,10 @@ mod delete;
 mod dir;
 mod display;
 mod paste;
+mod read;
 mod state;
 mod sys;
+mod write;
 
 use boot::*;
 use change_directory::ChangeDirectory;
@@ -25,10 +27,12 @@ use delete::*;
 use dir::*;
 use display::DisplayDirectory;
 use paste::PasteDirectory;
+use read::*;
 use state::DisplayState;
 use state::State;
 use state::Status;
 use sys::Sys;
+use write::*;
 
 #[allow(dead_code)]
 #[derive(Debug, Bundle)]
